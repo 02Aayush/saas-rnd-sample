@@ -7,15 +7,25 @@ from visits.models import PageVists
 # this_dir = pathlib.Path(__file__).resolve().parent
 
 
-def home_page_view(request, *args, **kwargs):
+def home_view(request, *args, **kwargs):
+    return about_view(request, *args, **kwargs)
+
+
+def about_view(request, *args, **kwargs):
     qs = PageVists.objects.all() #query into DB using ORM Django.
     page_qs = PageVists.objects.filter(path=request.path)
+    
+    try:
+        percent = (page_qs.count() * 100.00) / qs.count()
+    except ZeroDivisionError:
+        percent = 0.00
+        
     my_title = "My Page"
     my_context = {
         "page_title": my_title,
         # "queryset": queryset
         "page_visit_count": page_qs.count(),
-        "percent": (page_qs.count() * 100.00) / qs.count(),
+        "percent": percent,
         "total_visit_count": qs.count(),
         
     }
@@ -24,8 +34,6 @@ def home_page_view(request, *args, **kwargs):
     html_template = "home.html"
     PageVists.objects.create(path=request.path)
     return render(request, html_template, my_context)
-
-
 
 
 def my_old_home_page_view(request, *args, **kwargs):
