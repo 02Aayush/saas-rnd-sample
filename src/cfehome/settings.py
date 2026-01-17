@@ -27,11 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     ".railwauy.app", # https://*.railway.app
+    "saas-rnd-sample-production-1427.up.railway.app",
 ]
 if DEBUG:
     ALLOWED_HOSTS += [
         "127.0.0.1",
-        "localhost"
+        "localhost",
     ]
 
 
