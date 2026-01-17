@@ -1,12 +1,9 @@
-{
-    "build": {
-        "builder": "DOCKERFILE",  # nix
-        "dockerfilePath": "./Dockerfile", # you can declare additional doc files here
-        "watchPatterns": [
-            "requirements.txt",
-            "src/**",
-            "railway.json",
-            "Dockerfile"
-        ]
-    }
-}
+[build]
+builder: "DOCKERFILE",  # nix
+dockerfilePath: "./Dockerfile", # you can declare additional doc files here
+watchPatterns": [
+    "requirements.txt",
+    "src/**",
+    "railway.json",
+    "Dockerfile"
+]
