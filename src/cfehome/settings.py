@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+# import os
+from decouple import config # using decouple now it'll take the system env variables over .env file
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,10 +21,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zg$+r%gpune6(u^q*ze+7me*8lisa*v5ai_)#4%1a*=jghs1ev'
+# SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") # This gives silently None if not found which is not good.
+SECRET_KEY = config("DJANGO_SECRET_KEY") # it'll raise error if not found.
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+# DEBUG = str(os.environ.get("DEBUG")).lower() == "true"
+DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
+
+print("DEBUG MODE IS", DEBUG, type(DEBUG))
+
+# RUN: set DEBUG=True && python manage.py runserver
 
 ALLOWED_HOSTS = [
     ".railwauy.app", # https://*.railway.app
@@ -91,6 +100,18 @@ DATABASES = {
     }
 }
 
+CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int, default=30)
+DATABASE_URL = config("DATABASE_URL", cast=str)
+
+if DATABASE_URL is not None:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=CONN_MAX_AGE,
+            conn_health_checks=True,
+            )  # 0.5 minutes
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
