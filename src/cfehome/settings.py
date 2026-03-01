@@ -28,9 +28,9 @@ SECRET_KEY = config("DJANGO_SECRET_KEY") # it'll raise error if not found.
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 # DEBUG = str(os.environ.get("DEBUG")).lower() == "true"
-DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
+DEBUG = config("DJANGO_DEBUG", cast=bool)
 
-print("DEBUG MODE IS", DEBUG, type(DEBUG))
+# print("DEBUG MODE IS", DEBUG, type(DEBUG))
 
 # RUN: set DEBUG=True && python manage.py runserver
 
@@ -102,7 +102,8 @@ DATABASES = {
 }
 
 CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int, default=30)
-DATABASE_URL = config("DATABASE_URL", cast=str)
+# DATABASE_URL = config("DATABASE_URL", cast=str)
+DATABASE_URL = config("DATABASE_URL", default=None)
 
 if DATABASE_URL is not None:
     import dj_database_url
