@@ -80,6 +80,10 @@ INSTALLED_APPS = [
     # my-apps
     'commando',
     'visits',
+    # 3rd party apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +94,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -156,6 +161,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Django Allauth Config
+LOGIN_REDIRECT_URL = "/"
+# ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory" # "mandatory", "optional", "none"
+# ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_SIGNUP_FIELDS = "username*", "email*", "password1", "password2"
+ACCOUNT_LOGIN_METHODS = "username", "email"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory" # "mandatory", "optional", "none"
+
+AUTHENTICATION_BACKENDS = [
+    # ...
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+    # ...
+]
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
