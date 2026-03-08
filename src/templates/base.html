@@ -10,6 +10,7 @@
 
         {% include 'nav/navbar.html' %}
         <div class="pt-16">
+            {% include 'base/messages.html' with messages=messages %}
             {% block content %}
             {% endblock content %}
         </div>

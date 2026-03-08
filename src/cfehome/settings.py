@@ -57,7 +57,7 @@ DEBUG = config("DJANGO_DEBUG", cast=bool)
 # RUN: set DEBUG=True && python manage.py runserver
 
 ALLOWED_HOSTS = [
-    ".railwauy.app", # https://*.railway.app
+    ".railway.app", # https://*.railway.app
     "saas-rnd-sample-production-1427.up.railway.app",
 ]
 if DEBUG:
@@ -65,7 +65,7 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
-
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)  
 
 # Application definition
 
@@ -77,14 +77,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites', # required for django allauth
     # my-apps
     'commando',
     'visits',
     # 3rd party apps
+    "allauth_ui",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.github', # change this if you want to use other providers
+    "widget_tweaks",
+    "slippers",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -182,8 +189,29 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Provider specific settings
+# SOCIALACCOUNT_PROVIDERS = {
+#     "github": {
+#         "VERIFIED_EMAIL": True,
+#     }
+# }
+# SOCIALACCOUNT_PROVIDERS = {
+#     "github": {
+#         "VERIFIED_EMAIL": True,
+#         "APP": {
+#             "client_id": "your-client-id-here",
+#             "secret": "your-secret-here",
+#         }
+#     }
+# }
+
 SOCIALACCOUNT_PROVIDERS = {
-    
+    "github": {
+        "VERIFIED_EMAIL": True,
+        "APP": {
+            "client_id": config("GITHUB_CLIENT_ID"),
+            "secret": config("GITHUB_CLIENT_SECRET"),
+        }
+    }
 }
 
 # Internationalization
