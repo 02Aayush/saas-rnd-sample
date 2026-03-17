@@ -65,7 +65,6 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
-print("ALLOWED_HOSTS:", ALLOWED_HOSTS)  
 
 # Application definition
 
@@ -204,6 +203,7 @@ AUTHENTICATION_BACKENDS = [
 #     }
 # }
 
+# take the client_id and secret from env variables using decouple
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "VERIFIED_EMAIL": True,
