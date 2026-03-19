@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class PageVists(models.Model):
+class PageVisits(models.Model):
     # db -> table
     # id -> primary key -> autofield -> 1, 2, 3, 4, 5
     path = models.TextField(blank=True, null=True) # col

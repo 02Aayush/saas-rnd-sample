@@ -6,7 +6,7 @@ from django.conf import settings
 
 from django.http import HttpResponse
 
-from visits.models import PageVists
+from visits.models import PageVisits
 
 LOGIN_URL = settings.LOGIN_URL
 
@@ -20,8 +20,8 @@ def home_view(request, *args, **kwargs):
 
 
 def about_view(request, *args, **kwargs):
-    qs = PageVists.objects.all() #query into DB using ORM Django.
-    page_qs = PageVists.objects.filter(path=request.path)
+    qs = PageVisits.objects.all() #query into DB using ORM Django.
+    page_qs = PageVisits.objects.filter(path=request.path)
     
     try:
         percent = (page_qs.count() * 100.00) / qs.count()
@@ -40,7 +40,7 @@ def about_view(request, *args, **kwargs):
     path = request.path
     print("path", path)
     html_template = "home.html"
-    PageVists.objects.create(path=request.path)
+    PageVisits.objects.create(path=request.path)
     return render(request, html_template, my_context)
 
 

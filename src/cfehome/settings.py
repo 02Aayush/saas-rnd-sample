@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'django.contrib.sites', # required for django allauth
     # my-apps
     'commando',
+    'profiles',
     'visits',
     # 3rd party apps
     "allauth_ui",
