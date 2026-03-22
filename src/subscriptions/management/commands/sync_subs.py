@@ -1,12 +1,12 @@
 from typing import Any
 from django.core.management.base import BaseCommand
-from subscriptions.models import subscription
+from subscriptions.models import Subscription
 
 class Command(BaseCommand):
     
     def handle(self, *args: Any, **options: Any):
         print("Syncing subscriptions...")
-        qs = subscription.objects.filter(active=True)
+        qs = Subscription.objects.filter(active=True)
         
         if not qs.exists():
             print("No active subscriptions found.")
