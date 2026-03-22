@@ -17,7 +17,16 @@ def profile_list_view(request):
 @login_required
 def profile_detail_view(request, username=None, *args, **kwargs):
     user = request.user
+    user_groups = user.groups.all()
+    print(user.has_perm("subscriptions.basic"),
+          user.has_perm("subscriptions.basic_ai"),
+          user.has_perm("subscriptions.pro"),
+          user.has_perm("subscriptions.advanced"),
+          )
     
+    # print("user_groups: ", user_groups)
+    # if user_groups.filter(name__icontains='basic').exists():
+    #     return HttpResponse("You are a basic user.")
     # profile_user_obj = User.objects.get(username=username)
     profile_user_obj = get_object_or_404(User, username=username)
     is_me = profile_user_obj == user

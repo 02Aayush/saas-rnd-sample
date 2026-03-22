@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     # my-apps
     'commando',
     'profiles',
+    'subscriptions',
     'visits',
     # 3rd party apps
     "allauth_ui",
