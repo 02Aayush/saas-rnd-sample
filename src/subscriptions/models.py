@@ -71,7 +71,6 @@ class SubscriptionPrice(models.Model):
         if (not self.stripe_id and
             self.product_stripe_id is not None):
             import stripe
-            stripe.api_key = "sk_test_51TDrwQJtJoLcLnoYGk7OPVJG9T2vjL7DxIJoFIOmFY8Z9dcH85z6GzFah3QEVJOA38VlEvXnm28rzK1vRuiS6ed400cSssUDok"
 
             price = stripe.Price.create(
             currency="usd",
@@ -79,6 +78,7 @@ class SubscriptionPrice(models.Model):
             recurring={"interval": self.interval},
             product_data=self.product_stripe_id,
             )
+            self.stripe_id = price.id
         super().save(*args, **kwargs)
     
     
