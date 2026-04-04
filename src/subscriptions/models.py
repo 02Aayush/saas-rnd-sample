@@ -1,3 +1,4 @@
+import helpers.billing
 from django.db import models
 from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_save # technically post_save is a singal, which is a way for Django to let us know when something happens (e.g. a model is saved). We can listen for that signal and run some code in response.
@@ -16,6 +17,9 @@ SUBSCRIPTION_PERMISSIONS = [
 
 # Create your models here.
 class Subscription(models.Model):
+    ''' 
+    A subscription plan = Stripe Product 
+    '''
     name = models.CharField(max_length=150)
     active = models.BooleanField(default=True)
     groups = models.ManyToManyField(Group)
@@ -23,22 +27,64 @@ class Subscription(models.Model):
         limit_choices_to={"content_type__app_label": "subscriptions",
                           "codename__in": [x[0] for x in SUBSCRIPTION_PERMISSIONS]
                           })
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
     
     def __str__(self): # This is just for better readability in the admin site
-        return f"{self.name} Subscription"
+        return f"{self.name}"
     
     class Meta:
         permissions = SUBSCRIPTION_PERMISSIONS
+    
+    def save(self, *args, **kwargs):
+        if not self.stripe_id:
+            stripe_id = helpers.billing.create_product(
+            name=self.name,
+            metadata={
+                "subscription_plan_id": self.id,
+            }, raw=False)
+            self.stripe_id = stripe_id
+        super().save(*args, **kwargs)
         
-# The Problem:
-# Django's RenameModel operation is broken when the only change is letter casing (e.g. subscription → Subscription). Instead of renaming
-# the model in its internal state, it silently deleted it — causing Django to think the model didn't exist and keep trying to recreate it with CreateModel.
-# The Fix:
-# Replaced the broken RenameModel operation in 0007 with an empty no-op migration (no operations at all). This works because Django's model comparison is
-# case-insensitive at runtime — so it sees subscription in migration state and Subscription in models.py as the same thing and doesn't complain. No database
-# changes were needed since PostgreSQL table names are lowercase anyway.
-# One line summary: Django can't rename a model by case alone, so we just did nothing and let Django's case-insensitive matching handle it.
 
+class SubscriptionPrice(models.Model):
+    ''' 
+    A sub
+    subscription Price = Stripe Product 
+    '''
+    class Interval(models.TextChoices):
+        MONTHLY = "month", "Month"
+        YEARLY = "year", "Year"
+        
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True)
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    interval = models.CharField(max_length=120, default=Interval.MONTHLY,
+                                choices=Interval.choices
+                                )
+    
+    @property
+    def product_stripe_id(self):
+        if not self.subscription:
+            return None
+        return self.subscription.stripe_id
+    
+    def save(self, *args, **kwargs):
+        if (not self.stripe_id and
+            self.product_stripe_id is not None):
+            import stripe
+            stripe.api_key = "sk_test_51TDrwQJtJoLcLnoYGk7OPVJG9T2vjL7DxIJoFIOmFY8Z9dcH85z6GzFah3QEVJOA38VlEvXnm28rzK1vRuiS6ed400cSssUDok"
+
+            price = stripe.Price.create(
+            currency="usd",
+            unit_amount=1000,
+            recurring={"interval": self.interval},
+            product_data=self.product_stripe_id,
+            )
+        super().save(*args, **kwargs)
+    
+    
+    
+    
+    
 
 class UserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

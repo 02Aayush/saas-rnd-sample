@@ -9,11 +9,27 @@ if "sk_test" in STRIPE_SECRET_KEY and not DJANGO_DEBUG:
 
 stripe.api_key = STRIPE_SECRET_KEY
 
-def create_customer(name="", email="", metadata={},
+# Reference: https://stripe.com/docs/api/customers/create
+def create_customer(name="",
+                    email="",
+                    metadata={},
                     raw=False):
     response = stripe.Customer.create(
         name = name,
         email = email,
+        metadata = metadata,
+    )
+    if raw:
+        return response
+    stripe_id = response.id
+    return stripe_id
+
+# Reference: https://stripe.com/docs/api/products/create
+def create_product(name="",
+                   metadata={},
+                   raw=False):
+    response = stripe.Product.create(
+        name = name,
         metadata = metadata,
     )
     if raw:
