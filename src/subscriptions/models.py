@@ -28,11 +28,16 @@ class Subscription(models.Model):
                           "codename__in": [x[0] for x in SUBSCRIPTION_PERMISSIONS]
                           })
     stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    order = models.IntegerField(default=-1, help_text='Ordering on Django Pricing Page') 
+    featured = models.BooleanField(default=True, help_text='Featured on Django Pricing Page')
+    updated = models.DateTimeField(auto_now=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self): # This is just for better readability in the admin site
         return f"{self.name}"
     
     class Meta:
+        ordering = ['order', 'featured', '-updated']
         permissions = SUBSCRIPTION_PERMISSIONS
     
     def save(self, *args, **kwargs):
@@ -60,6 +65,13 @@ class SubscriptionPrice(models.Model):
                                 choices=Interval.choices
                                 )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=99.99)
+    order = models.IntegerField(default=-1, help_text='Ordering on Django Pricing Page') 
+    featured = models.BooleanField(default=True, help_text='Featured on Django Pricing Page')
+    updated = models.DateTimeField(auto_now=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta: # meta means it's not a real model, it's just some metadata for the model.
+        ordering = ['subscription__order', 'order', 'featured', '-updated']
     
     @property
     def stripe_currency(self):
@@ -93,16 +105,19 @@ class SubscriptionPrice(models.Model):
             )
             self.stripe_id = stripe_id
         super().save(*args, **kwargs)
-    
-    
-    
-    
+        if self.featured and self.subscription:
+            # set all other prices for the same subscription to not featured
+            qs = SubscriptionPrice.objects.filter(
+                subscription=self.subscription,
+                interval = self.interval
+            ).exclude(id=self.id)
+            qs.update(featured=False)
     
 
 class UserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription,
-    on_delete = models.SET_NULL, null=True, blank=True)
+                on_delete = models.SET_NULL, null=True, blank=True)
     active = models.BooleanField(default=True)
 
 def user_sub_post_save(sender, instance, created, **kwargs):
