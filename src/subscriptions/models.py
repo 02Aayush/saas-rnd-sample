@@ -48,18 +48,29 @@ class Subscription(models.Model):
 
 class SubscriptionPrice(models.Model):
     ''' 
-    A sub
     subscription Price = Stripe Product 
     '''
     class Interval(models.TextChoices):
         MONTHLY = "month", "Month"
         YEARLY = "year", "Year"
         
-    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True)
+    subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True)
     stripe_id = models.CharField(max_length=120, null=True, blank=True)
     interval = models.CharField(max_length=120, default=Interval.MONTHLY,
                                 choices=Interval.choices
                                 )
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=99.99)
+    
+    @property
+    def stripe_currency(self):
+        return "usd"
+    
+    @property
+    def stripe_price(self):
+        """
+        remove decimal places
+        """
+        return int(self.price * 100)
     
     @property
     def product_stripe_id(self):
@@ -70,15 +81,17 @@ class SubscriptionPrice(models.Model):
     def save(self, *args, **kwargs):
         if (not self.stripe_id and
             self.product_stripe_id is not None):
-            import stripe
-
-            price = stripe.Price.create(
-            currency="usd",
-            unit_amount=1000,
-            recurring={"interval": self.interval},
-            product_data=self.product_stripe_id,
+            stripe_id = helpers.billing.create_price(
+                currency=self.stripe_currency,
+                unit_amount=self.stripe_price,
+                interval=self.interval,
+                product=self.product_stripe_id,
+                metadata={
+                    "subscription_plan_price_id": self.id,
+                },
+                raw=False
             )
-            self.stripe_id = price.id
+            self.stripe_id = stripe_id
         super().save(*args, **kwargs)
     
     
