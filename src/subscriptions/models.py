@@ -21,6 +21,7 @@ class Subscription(models.Model):
     A subscription plan = Stripe Product 
     '''
     name = models.CharField(max_length=150)
+    subtitle = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
     groups = models.ManyToManyField(Group)
     permissions = models.ManyToManyField(Permission,
@@ -32,6 +33,7 @@ class Subscription(models.Model):
     featured = models.BooleanField(default=True, help_text='Featured on Django Pricing Page')
     updated = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    features = models.TextField(null=True, blank=True, help_text="Features for pricing, separated by new lines")
     
     def __str__(self): # This is just for better readability in the admin site
         return f"{self.name}"
@@ -39,6 +41,11 @@ class Subscription(models.Model):
     class Meta:
         ordering = ['order', 'featured', '-updated']
         permissions = SUBSCRIPTION_PERMISSIONS
+    
+    def get_features_as_list(self):
+        if not self.features:
+            return []
+        return [x.strip() for x in self.features.split("\n")]
     
     def save(self, *args, **kwargs):
         if not self.stripe_id:
@@ -72,6 +79,24 @@ class SubscriptionPrice(models.Model):
     
     class Meta: # meta means it's not a real model, it's just some metadata for the model.
         ordering = ['subscription__order', 'order', 'featured', '-updated']
+    
+    @property
+    def display_features_list(self):
+        if not self.subscription:
+            return []
+        return self.subscription.get_features_as_list()
+    
+    @property
+    def display_sub_name(self):
+        if not self.subscription:
+            return "Plan"
+        return self.subscription.name
+    
+    @property
+    def display_sub_subtitle(self):
+        if not self.subscription:
+            return "Plan"
+        return self.subscription.subtitle
     
     @property
     def stripe_currency(self):
