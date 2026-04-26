@@ -3,8 +3,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
+from django.contrib.auth import get_user_model
 from django.conf import settings
-from subscriptions.models import SubscriptionPrice
+from django.http import HttpResponseBadRequest
+
+from subscriptions.models import SubscriptionPrice, Subscription, UserSubscription
+
+User = get_user_model()
 
 BASE_URL = settings.BASE_URL
 # Create your views here.
@@ -38,17 +43,45 @@ def checkout_redirect_view(request):
 
 def checkout_finalize_view(request):
     session_id = request.GET.get('session_id')
-    checkout_r = helpers.billing.get_checkout_session(session_id, raw=True)
-    customer_id = checkout_r.customer
-    sub_stripe_id = checkout_r.subscription
-    sub_r = helpers.billing.get_subscription(sub_stripe_id, raw=True)
-    sub_plan = sub_r.plan
-    sub_plan_price_stripe_id = sub_plan.id
-    price_qs = SubscriptionPrice.objects.filter(stripe_id=sub_plan_price_stripe_id)
-    print("checkout_r", checkout_r)
-    print("sub_r", sub_r)
-    context = {
-        "checkout": checkout_r,
-        "subscription": sub_r,
+    customer_id, plan_id, sub_stripe_id = helpers.billing.get_checkout_customer_plan(session_id)
+    try:
+        sub_obj = Subscription.objects.get(subscriptionprice__stripe_id=plan_id)
+    except:
+        sub_obj = None
+    
+    try:
+        user_obj = User.objects.get(customer__stripe_id=customer_id)
+    except:
+        user_obj = None
+    
+    _user_sub_exists = False
+    updated_sub_options = {
+        "subscription": sub_obj,
+        "stripe_id": sub_stripe_id,
+        "user_cancel": False
     }
-    return render(request, "checkouts/checkout-success.html", context)
+    try:
+        _user_sub_obj = UserSubscription.objects.get(user=user_obj)
+        _user_sub_exists = True
+    except UserSubscription.DoesNotExist:
+        _user_sub_obj = UserSubscription.objects.create(
+            user=user_obj,
+            **updated_sub_options
+        )
+    except:
+        _user_sub_obj = None
+    if None in [sub_obj, user_obj, _user_sub_obj]:
+        return HttpResponseBadRequest("Error with your account. Please contact support.")
+
+    if _user_sub_exists:
+        # cancel old sub
+        old_stripe_id = _user_sub_obj.stripe_id
+        if old_stripe_id is not None:
+            helpers.billing.cancel_subscription(old_stripe_id, reason="Auto ended, new membership", feedback="other")
+        # assign new sub
+        for k, v in updated_sub_options.items():
+            setattr(_user_sub_obj, k, v)
+        _user_sub_obj.save()
+        
+    context = {}
+    return render(request, "checkouts/success.html", context)
