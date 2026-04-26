@@ -55,7 +55,7 @@ DEBUG = config("DJANGO_DEBUG", cast=bool)
 # print("DEBUG MODE IS", DEBUG, type(DEBUG))
 
 # RUN: set DEBUG=True && python manage.py runserver
-
+BASE_URL = config("BASE_URL", default=None)
 ALLOWED_HOSTS = [
     ".railway.app", # https://*.railway.app
     "saas-rnd-sample-production-1427.up.railway.app",
