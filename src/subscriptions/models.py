@@ -144,6 +144,15 @@ class SubscriptionPrice(models.Model):
     
 
 class UserSubscription(models.Model):
+    class SubscriptionStatus(models.TextChoices):
+        ACTIVE = "active", "Active"
+        TRAILING = "trialing", "Trialing"
+        INCOMPLETE = "incomplete", "Incomplete"
+        INCOMPLETE_EXPIRED = "incomplete_expired", "Incomplete Expired"
+        CANCELED = "canceled", "Canceled"
+        PAST_DUE = "past_due", "Past Due"
+        UNPAID = "unpaid", "Unpaid"
+        PAUSED = "paused", "Paused"
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription,
                 on_delete = models.SET_NULL, null=True, blank=True)
@@ -156,6 +165,7 @@ class UserSubscription(models.Model):
                                                 auto_now_add=False, blank=True, null=True)
     current_period_end = models.DateTimeField(auto_now=False, 
                                                 auto_now_add=False, blank=True, null=True)
+    status = models.CharField(max_length=120, choices=SubscriptionStatus.choices, null=True, blank=True)
     
     @property
     def billing_cycle_anchor(self):
