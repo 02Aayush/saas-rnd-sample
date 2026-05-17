@@ -5,12 +5,14 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from subscriptions.models import SubscriptionPrice, UserSubscription
 from subscriptions import utils as subscription_utils
+
 @login_required
 def user_subscription_view(request):
     user_sub_obj, created = UserSubscription.objects.get_or_create(user=request.user)
     if request.method == "POST":
         print("Refresh Subscription")
-        finished = subscription_utils.refresh_active_user_subscriptions(user_ids=[request.user.id])
+        finished = subscription_utils.refresh_active_user_subscriptions(user_ids=[request.user.id],
+                                                                        active_only=False)
         if finished:
             messages.success(request, "Your subscription has been refreshed.")
         else:

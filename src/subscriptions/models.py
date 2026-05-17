@@ -1,5 +1,6 @@
 import helpers.billing
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_save # technically post_save is a singal, which is a way for Django to let us know when something happens (e.g. a model is saved). We can listen for that signal and run some code in response.
 from django.conf import settings
@@ -151,7 +152,32 @@ class SubscriptionStatus(models.TextChoices):
         PAST_DUE = "past_due", "Past Due"
         UNPAID = "unpaid", "Unpaid"
         PAUSED = "paused", "Paused"
-        
+
+class UserSubscriptionQuerySet(models.QuerySet):
+    def by_active_trialing(self):
+        active_qs_lookup = (
+            Q(status=SubscriptionStatus.ACTIVE) |
+            Q(status=SubscriptionStatus.TRAILING) # spelling mistake in trailing instead of trialing in models
+        )
+        return self.filter(active_qs_lookup)
+
+    def by_user_ids(self, user_ids=None):
+        qs = self
+        if isinstance(user_ids, list):
+            qs = self.filter(user_id__in=user_ids)
+        elif isinstance(user_ids, int):
+            qs = self.filter(user_id__in=[user_ids])
+        elif isinstance(user_ids, str):
+            qs = self.filter(user_id__in=[user_ids])
+        return qs
+
+class UserSubscriptionManager(models.Manager):
+    def get_queryset(self):
+        return UserSubscriptionQuerySet(self.model, using=self._db)
+
+    # def by_user_ids(self, user_ids):
+    #     return self.get_queryset().by_user_ids(user_ids=user_ids)
+
 class UserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription,
@@ -168,6 +194,7 @@ class UserSubscription(models.Model):
     cancel_at_period_end = models.BooleanField(default=False)
     status = models.CharField(max_length=120, choices=SubscriptionStatus.choices, null=True, blank=True)
     
+    objects = UserSubscriptionManager()
     def get_absolute_url(self):
         return reverse("user_subscription")
     

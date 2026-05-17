@@ -20,4 +20,6 @@ class Command(BaseCommand):
             subscription_utils.clear_dangling_subscriptions()
         else:
             print("Sync active subs")
-            print("Done")
+            done = subscription_utils.refresh_active_user_subscriptions(active_only=True, verbose=True)
+            if done:
+                print("Done")
