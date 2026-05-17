@@ -1,6 +1,7 @@
 name: Hello World Github Actions
 
 on:
+  workflow_dispatch: # Manually trigger the workflow
   push: # git push
     branches:
       - main
