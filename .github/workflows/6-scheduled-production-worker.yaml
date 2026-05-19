@@ -12,7 +12,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DJANGO_DEBUG: ${{ secrets.DJANGO_DEBUG }}
+      DJANGO_DEBUG: 0
+      STRIPE_TEST_OVERRIDE: 1 # This allows us to use test keys in production for this workflow, which is useful for testing and development purposes. In a real workflow, you would want to set this to 0 or remove it entirely to ensure that only valid production keys are used.
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       # DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
