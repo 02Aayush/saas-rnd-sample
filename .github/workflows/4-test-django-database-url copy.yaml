@@ -2,9 +2,9 @@ name: 4 - Test Django with Actions Secret Database URL
 
 on:
   workflow_dispatch: 
-  push: # git push
-    branches:
-      - main
+  # push: # git push
+  #   branches:
+  #     - main
 
 jobs:
   test:
