@@ -14,7 +14,7 @@ jobs:
       # DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
-      NEON_PROD_BRANCH: "main"
+      NEON_PROD_BRANCH: "production"
       NEON_GITHUB_BRANCH: "gh-delete"
       # DJANGO_SECRET_KEY: not-good
       GITHUB_CLIENT_ID: test-client-id # This is a dummy value for testing purposes. In a real workflow, you would use a secret or an environment variable to store sensitive information.
@@ -56,3 +56,7 @@ jobs:
         working-directory: ./src
         run: |
           python manage.py test
+      - name: Clean Up Step
+        continue-on-error: true
+        run: |
+          neonctl branches delete "${{ env.NEON_GITHUB_BRANCH }}" --project-id "${{ env.NEON_PROJECT_ID }}"
