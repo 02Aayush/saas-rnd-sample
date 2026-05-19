@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 # import os
-import sys
 from decouple import config # using decouple now it'll take the system env variables over .env file
 from pathlib import Path
 
@@ -140,8 +139,7 @@ DATABASES = {
 }
 
 CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int, default=30)
-if "test" in sys.argv:
-    CONN_MAX_AGE = 0
+
 # DATABASE_URL = config("DATABASE_URL", cast=str)
 DATABASE_URL = config("DATABASE_URL", default=None)
 
@@ -240,10 +238,10 @@ STATICFILES_BASE_DIR = BASE_DIR / "staticfiles"
 STATICFILES_VENDOR_DIR = STATICFILES_BASE_DIR / "vendors"
 
 # source(s) for python manage.py collectstatic
-# STATICFILES_DIRS = [
-#     STATICFILES_BASE_DIR
-# ]
-STATICFILES_DIRS = [STATICFILES_BASE_DIR] if STATICFILES_BASE_DIR.exists() else []
+STATICFILES_DIRS = [
+    STATICFILES_BASE_DIR
+]
+
 
 # output for python manage.py collectstatic
 # local cdn
