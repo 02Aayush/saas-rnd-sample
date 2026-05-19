@@ -12,6 +12,8 @@ jobs:
     env:
       DJANGO_DEBUG: 0
       # DJANGO_SECRET_KEY: not-good
+      GITHUB_CLIENT_ID: test-client-id
+      GITHUB_CLIENT_SECRET: test-client-secret
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
