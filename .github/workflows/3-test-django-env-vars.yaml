@@ -1,10 +1,10 @@
-name: 2 - Test Django Basics
+name: 3 - Test Django env vars
 
 on:
   workflow_dispatch: 
-  # push: # git push
-  #   branches:
-  #     - main
+  push: # git push
+    branches:
+      - main
 
 jobs:
   test:
@@ -22,5 +22,7 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Django Tests
         working-directory: ./src
+        env:
+          DJANGO_SECRET_KEY: not-good
         run: |
           python manage.py test
