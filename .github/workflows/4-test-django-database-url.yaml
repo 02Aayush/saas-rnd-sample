@@ -13,6 +13,8 @@ jobs:
       DJANGO_DEBUG: 0
       DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
       # DJANGO_SECRET_KEY: not-good
+      GITHUB_CLIENT_ID: test-client-id # This is a dummy value for testing purposes. In a real workflow, you would use a secret or an environment variable to store sensitive information.
+      GITHUB_CLIENT_SECRET: test-client-secret
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
