@@ -14,6 +14,7 @@ jobs:
       # DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      NEON_DATABASE_NAME: ${{ secrets.NEON_DATABASE_NAME }}
       NEON_PROD_BRANCH: "production"
       NEON_GITHUB_BRANCH: "gh-delete"
       # DJANGO_SECRET_KEY: not-good
@@ -42,7 +43,10 @@ jobs:
           neonctl branches create --name "${{ env.NEON_GITHUB_BRANCH }}" --parent "${{ env.NEON_PROD_BRANCH }}" --project-id "${{ env.NEON_PROJECT_ID }}"
       - name: Databse URL Env Val for new Github Actions branch
         run: |
-          MY_NEON_CONN_STRING=$(neonctl connection-string --branch "${{ env.NEON_GITHUB_BRANCH }}" --project-id "${{ env.NEON_PROJECT_ID }}")
+          # MY_NEON_CONN_STRING=$(neonctl connection-string --branch "${{ env.NEON_GITHUB_BRANCH }}" --project-id "${{ env.NEON_PROJECT_ID }}")
+          # Use the provided NEON_DATABASE_NAME or default to "test_neondb"
+          DB_NAME=${NEON_DATABASE_NAME:-test_neondb}
+          MY_NEON_CONN_STRING=$(neonctl connection-string --branch "${{ env.NEON_GITHUB_BRANCH }}" --project-id "${{ env.NEON_PROJECT_ID }}" --database-name "$DB_NAME")
           echo "DATABASE_URL=$MY_NEON_CONN_STRING" >> $GITHUB_ENV
       - name: Setup Django Secret Key
         run: |
