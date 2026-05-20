@@ -2,9 +2,9 @@ name: 5 Neon db branch django tests
 
 on:
   workflow_dispatch: 
-  push: # git push
-    branches:
-      - main
+  # push: # git push
+  #   branches:
+  #     - main
 
 jobs:
   test:
